@@ -24,24 +24,6 @@ function Todolist(){
     }
   }
 
-  const initialDoneCounter = () => {
-    if(localStorage.getItem('çountDone')){
-      return
-    } else{
-      localStorage.setItem('countDone', 0);
-    }
-  }
-
-  const initialNotDoneCounter = () => {
-    if(localStorage.getItem('çountNotDone')){
-      return
-    } else{
-      localStorage.setItem('countNotDone', 0);
-    }
-  }
-
-  initialDoneCounter();
-  initialNotDoneCounter();
   initialIdCounter(); 
   initialList();
 
@@ -66,17 +48,10 @@ function Todolist(){
       dayCreation: new Date().getDate(),
       done: false
     });
-    const tempId = localStorage.getItem('id');
-    const nextId = Number(tempId) + 1;
-    const countDone = localStorage.getItem('countDone');
-    const nextCountDone = Number(countDone) + 1;
-    localStorage.removeItem('id');
-    localStorage.setItem('id', nextId);
-    localStorage.removeItem('countDone');
-    localStorage.setItem('countDone', nextCountDone);
+    localStorage.setItem('id', Number(localStorage.getItem('id')) + 1);
+    localStorage.setItem('countNotDone', Number(localStorage.getItem('countNotDone')) + 1);
     localStorage.setItem('list', JSON.stringify(arr));
     setList(JSON.parse(localStorage.getItem('list')));
-    
   }
 
 
@@ -90,6 +65,14 @@ function Todolist(){
     const newList = localList.filter(i => {
       return i.id !== Number(e.target.parentElement.parentElement.parentElement.id)
     })
+    const deletedNote = localList.filter(i => {
+      return i.id === Number(e.target.parentElement.parentElement.parentElement.id)
+    })
+    if(deletedNote[0].done){
+      localStorage.setItem('countDone', Number(localStorage.getItem('countDone')) - 1);
+    } else{
+      localStorage.setItem('countNotDone', Number(localStorage.getItem('countNotDone')) - 1);
+    }
     localStorage.setItem('list', JSON.stringify(newList));
     setList(JSON.parse(localStorage.getItem('list')));
   }
@@ -119,8 +102,12 @@ function Todolist(){
     }
     if(foundedNote !== undefined){
       if(foundedNote.done === false){
-        changeDone(true, foundedNoteIndex, foundedNote, listNote)
+        localStorage.setItem('countDone', Number(localStorage.getItem('countDone')) + 1);
+        localStorage.setItem('countNotDone', Number(localStorage.getItem('countNotDone') - 1));
+        changeDone(true, foundedNoteIndex, foundedNote, listNote);
       } else{
+        localStorage.setItem('countNotDone', Number(localStorage.getItem('countNotDone')) + 1);
+        localStorage.setItem('countDone', Number(localStorage.getItem('countDone')) - 1);
         changeDone(false, foundedNoteIndex, foundedNote, listNote)
       }
     }
@@ -156,9 +143,6 @@ function Todolist(){
     })
   }, [list]);
 
-  const [countDone, setCountDone] = useState(0);
-  const [countNotDone, setCountNotDone] = useState(0);
-
   const checkDay = (day, hours, minutes, seconds) => {
     if(list.length !== 0){
       if(list[0]){
@@ -173,13 +157,25 @@ function Todolist(){
     }
   }
 
+  
+  /* Reset ============================================== */
+
   const clearList = (time) => {
     setTimeout(() => {
+      localStorage.setItem('globalCountDone', Number(localStorage.getItem('globalCountDone')) + Number(localStorage.getItem('countDone')));
+      localStorage.setItem('globalCountNotDone', Number(localStorage.getItem('globalCountNotDone')) + Number(localStorage.getItem('countNotDone')));
+      setGlobalCountDone(Number(localStorage.getItem('globalCountDone')));
+      setGlobalCountNotDone(Number(localStorage.getItem('globalCountNotDone')));
       setList([]);
       localStorage.removeItem('list');
       localStorage.removeItem('id');
+      localStorage.removeItem('countDone');
+      localStorage.removeItem('countNotDone');
     }, time)
   }
+
+  const [globalCountDone, setGlobalCountDone] = useState(Number(localStorage.getItem('globalCountDone')));
+  const [globalCountNotDone, setGlobalCountNotDone] = useState(Number(localStorage.getItem('globalCountNotDone')));
  
   return(
     <section className="todolist">
@@ -254,8 +250,8 @@ function Todolist(){
         </div>
       </div>
       <div className="counter">
-        <h3 className="counter__count counter__count_color_green">{countDone}</h3>
-        <h3 className="counter__count counter__count_color_red">{countNotDone}</h3>
+        <h3 className="counter__count counter__count_color_green">{globalCountDone}</h3>
+        <h3 className="counter__count counter__count_color_red">{globalCountNotDone}</h3>
         <p className="counter__subtitle">Сделано</p>
         <p className="counter__subtitle">Не сделано</p>
       </div>
