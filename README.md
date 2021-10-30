@@ -15,7 +15,7 @@
 
 ## Ссылка на проект: 
 
-*http://todolist.zakharovigor.ru/*
+*https://todolist.zakharovigor.ru/*
 
 
 
